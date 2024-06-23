@@ -1,19 +1,22 @@
-$user_arcpro_root = $Env:LOCALAPPDATA + "\Programs\ArcGIS\Pro"
-$machine_arcpro_root = "C:\Program Files\ArcGIS\Pro"
-
-$proExePathSuffix = "\bin\ArcGISPro.exe"
-$machineArcGISProExePath = $machine_arcpro_root + $proExePathSuffix
-$userArcGISProExePath = $user_arcpro_root + $proExePathSuffix
-
 # Error codes
 $errorArcProNotFound = 2
 $errorArcProRunning = 4
 $errorUnableToSwitchToTargetEnv = 8
 
+Write-Output("## MapAction Toolbar for ArcGIS Pro Installer ##")
 
 ###############
 # Determine the path to the various elements of ArcGIS Pro are installed
 ###############
+Write-Output("")
+Write-Output("## [1/4] Validating ArcGIS Pro installation ##")
+
+$user_arcpro_root = $Env:LOCALAPPDATA + "\Programs\ArcGIS\Pro"
+$machine_arcpro_root = "C:\Program Files\ArcGIS\Pro"
+$proExePathSuffix = "\bin\ArcGISPro.exe"
+$machineArcGISProExePath = $machine_arcpro_root + $proExePathSuffix
+$userArcGISProExePath = $user_arcpro_root + $proExePathSuffix
+
 if ((Test-Path -path $userArcGISProExePath) -eq $true)
 {
     $arcpro_root = $user_arcpro_root
@@ -24,41 +27,41 @@ elseif ((Test-Path -path $machineArcGISProExePath) -eq $true)
 } 
 else 
 {
-    Write-Error("ArcGIS Pro cannot be found")
+    Write-Error("ERROR! ArcGIS Pro not found")
     exit $errorArcProNotFound
 }
+Write-Information("INFO ArcGIS Pro installation found.")
 
-###############
-# Check if ArcGIS Pro is running
-###############
+Write-Output("INFO Validating ArcGIS Pro is not running.")
 if (Get-Process -Name "ArcGISPro" -ErrorAction:Ignore){
-    Write-Output("ArcGIS Pro is running. Installation cannot proceed whilst ArcGIS Pro is running.")
+    Write-Error("ERROR! ArcGIS Pro is running. Quit and try again.")
     exit $errorArcProRunning
 }
 
-# Now set all of varibles to point to all of the other exes we use
-# ESRI provide a wrapper script `propy.bat`, which passes python
-# cmds to the currently active conda/python env 
+# Set varibles to point to exes we use
+# ESRI provide `propy.bat` which resolves to the currently active conda env 
 $pythonPath = $arcpro_root + '\bin\Python\Scripts\propy.bat'
 $condaEnvPath = $arcpro_root + '\bin\Python\Scripts\conda-env.exe'
 $condaPath = $arcpro_root + '\bin\Python\Scripts\conda.exe'
 $pythonEnvUtilsPath = $arcpro_root + '\bin\PythonEnvUtils.exe'
-# $fullRegAddinPath=$arcpro_root + '\bin\RegisterAddIn.exe'
-# $fullArcProExePath = $arcpro_root + $proExePathSuffix
-
-Write-Output("condaEnvPath =" + $condaEnvPath)
+Write-Information("INFO `pythonPath`: " + $pythonPath)
+Write-Information("INFO `condaEnvPath`: " + $condaEnvPath)
+Write-Information("INFO `condaPath`: " + $condaPath)
+Write-Information("INFO `pythonEnvUtilsPath`: " + $pythonEnvUtilsPath)
 
 #################
-# If required create a target conda virtual envionment
+# If required, create conda virtual envionment
 #################
+Write-Output("")
+Write-Output("## [2/4] Checking Python environment ##")
+
 $target_venv_name = "mapaction-arc-py3"
 
-# If the MapAction venv does not exist create it:
 if (!(& $condaEnvPath list | Select-String -pattern "^$target_venv_name\s")){
-    Write-Output("Creating new `conda` env =" + $target_venv_name)
-    & $condaPath create -n $target_venv_name --yes --clone arcgispro-py3 
-    # & $condaEnvPath create -n $target_venv_name --force
-  # _conda_env_exe create --name $target_venv_name --clone arcgispro-py3
+    Write-Information("INFO Target conda env: '" + $target_venv_name + "' not found.")
+
+    Write-Information("INFO Cloning default ArcGIS Pro conda env as: '" + $target_venv_name + "'.")
+    & $condaPath create -n $target_venv_name --yes --clone arcgispro-py3
 }
 
 # Ensure that the $target_venv_name venv is activated and will be activated for future 
@@ -66,73 +69,84 @@ if (!(& $condaEnvPath list | Select-String -pattern "^$target_venv_name\s")){
 # distribution of Conda
 & $condaPath proswap -n $target_venv_name
 
-# Confirm that the the benv has been switched correctly
+# Confirm the new env has been switched correctly
 if (!(& $pythonEnvUtilsPath | Select-String -pattern "$target_venv_name$")){
-    Write-Output("Unable to switch to `conda` env =" + $target_venv_name)
-    ext $errorUnableToSwitchToTargetEnv
+    Write-Error("ERROR! Unable to switch to set " + $target_venv_name + " conda environment as default.")
+    exit $errorUnableToSwitchToTargetEnv
 }
 
-# Now install dependancies within our target python env:
-# Assumes that `requirements.txt` is in the same directory as this script
+#################
+# Install Python dependencies
+#################
+Write-Output("")
+Write-Output("## [3/4] Configuring Python environment ##")
 
-# Steve's implenmentation:
-# curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-# & $fullPythonPath get-pip.py
+$wheels_dir = $PSScriptRoot + "\wheels"
+$wheel_paths = Get-ChildItem -Path "$wheels_dir\*.whl"
 
+Write-Information("INFO Upgrading Pip.")
 & $pythonPath -m pip install --no-cache-dir --upgrade pip
-& $pythonPath -m pip install --no-cache-dir -r $PSScriptRoot\requirements.txt
 
+Write-Information("INFO Installing Python dependencies.")
+foreach ($wheel_path in $wheel_paths) {
+    & $pythonPath -m pip install --no-cache-dir --no-deps $wheel_path
+}
 
-##########
-# Now ensure that the addin itself is available and registered with ArcGIS Pro.
-# There are two components to this.
+#################
+# Install Esri AddIn dependencies
+#################
+Write-Output("")
+Write-Output("## [4/4] Installing Esri AddIn ##")
+
+# Ensure addin is available and registered with ArcGIS Pro.
 #
-# 1) Create this directory and copy the `esriAddinX` file into it:
+# There are two components to this:
+#
+# 1) Create directory and copy the `esriAddinX` file into it:
 #  - "$env:LOCALAPPDATA\MapAction\toolbar-for-arcgispro"
 #
-# 2) Add a suitable entry in this part of the registry, which directs ArcGIS Pro
-#    to look in the directory above:
-#  -   'HKCU\SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders'
-#
-# (As of 2021-07-17 we are going to attempt to implenment this without using the `RegisterAddIn.exe` tool)
-##########
+# 2) Add registry key, which directs ArcGIS Pro to look in the directory above:
+#  - "HKCU\SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
 
 $assemblyCache_folder = $env:LOCALAPPDATA + "\ESRI\ArcGISPro\AssemblyCache"
-
-if ((Test-Path -PathType "Container" -path $assemblyCache_folder)){
-    Remove-Item -LiteralPath $assemblyCache_folder -Force -Recurse
-}
-
 $target_addinX_folder = $env:LOCALAPPDATA + "\MapAction\toolbar-for-arcgispro"
 $target_reg_path = "HKCU:SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
 $source_addinx_file = $PSScriptRoot + "\MapActionToolbars.esriAddinX"
 $source_python_dir = $PSScriptRoot + "\python"
 $target_python_dir = $target_addinX_folder + "\python"
+$zipRenamed = $source_addinx_file.Replace(".esriAddinX", ".zip")
+$extracted_source_python_dir = $PSScriptRoot + "\Install\Python"
+$extracted_source_python_dir_with_filter = $extracted_source_python_dir + "/*"
 
-# Remove target folder
+# Clean out any existing assembly caches
+Write-Information("INFO Removing assembly caches.")
+if ((Test-Path -PathType "Container" -path $assemblyCache_folder)){
+    Remove-Item -LiteralPath $assemblyCache_folder -Force -Recurse
+}
+
+# Remove and recreate target folder
+Write-Information("INFO Recreating AddIn directory.")
 if ((Test-Path -PathType "Container" -path $target_addinX_folder)){
     Remove-Item -LiteralPath $target_addinX_folder -Force -Recurse
 }
-# Create the target folder
 if (!(Test-Path -PathType "Container" -path $target_addinX_folder)){
-    # The `-force` switch means that any intermediate subdirectories are also created
+    # The `-force` switch ensures any intermediate subdirectories are also created
     New-Item -force -itemType "directory" -path $target_addinX_folder
     New-Item -force -itemType "directory" -path $target_python_dir
 }
 
-######################################################################################################
-
-$zipRenamed = $source_addinx_file.Replace(".esriAddinX", ".zip")
-
+# Copy AddIn
+Write-Information("INFO Extracting AddIn to directory.")
 Rename-Item -Path $source_addinx_file -NewName $zipRenamed
 Expand-Archive -LiteralPath $zipRenamed -DestinationPath $PSScriptRoot -Force
 Rename-Item -Path $zipRenamed -NewName $source_addinx_file
 
-$extracted_source_python_dir = $PSScriptRoot + "\Install\Python"
-
-$extracted_source_python_dir_with_filter = $extracted_source_python_dir + "/*"
+# Copy Toolboxes
+Write-Information("INFO Copying Toolboxes to install directory.")
 Copy-Item -Path $extracted_source_python_dir_with_filter -Destination $target_python_dir -Recurse -Force -ErrorAction Continue
 
+# Remove unused files from AddIn
+Write-Information("INFO Removing unused AddIn files.")
 Remove-Item -LiteralPath ($PSScriptRoot + "\DarkImages") -Force -Recurse
 Remove-Item -LiteralPath ($PSScriptRoot + "\Images") -Force -Recurse
 Remove-Item -LiteralPath ($PSScriptRoot + "\Install") -Force -Recurse
@@ -140,9 +154,16 @@ Remove-Item -LiteralPath ($PSScriptRoot + "\Resources") -Force -Recurse
 Remove-Item -LiteralPath ($PSScriptRoot + "\Config.daml") -Force -Recurse
 
 # Copy the .addinX file into the target folder
+Write-Information("INFO Copying AddIn to install directory.")
 Copy-item -path $source_addinx_file -destination $target_addinX_folder
 
-# Check that the "Add-In Folder" SubHive exists (this cmd doesn't nothing if the hive already exists)
+# Check that the "Add-In Folder" SubHive exists
+Write-Information("INFO Configuring registry.")
 New-Item -itemType "REG_SZ" -path $target_reg_path -ErrorAction:Ignore
-# Add the path to the Addin folder
+# Add the path to the AddIn folder
 Set-ItemProperty -path $target_reg_path -name $target_addinX_folder -Type "String" -Value $null
+
+Write-Output("")
+Write-Information("INFO Installation Complete.")
+Write-Output("If no errors occurred, you can safely close this window and click 'Finish' in the installation wizard.")
+Write-Output("If there were errors, please copy all the text in this window, save as a text file, and send to help-tech on Slack for assistance.")
