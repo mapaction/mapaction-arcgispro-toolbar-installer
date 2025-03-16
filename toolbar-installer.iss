@@ -2,7 +2,7 @@
 ; https://jrsoftware.org/ishelp/
 
 #define OrgURL "https://www.mapaction.org"
-#define Version "3.4.2.1.1"
+#define Version "3.4.2.1.2"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -36,4 +36,4 @@ Source: "requirements.txt"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: "toolbar-installer.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Run]
-Filename: "{win}\system32\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoExit -NoProfile -ExecutionPolicy bypass -file {tmp}\MapActionToolbarInstaller.ps1" ; Flags: runasoriginaluser; StatusMsg: "Installing MapAction Toolbar for ArcGIS Pro"
+Filename: "{win}\system32\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoExit -NoProfile -ExecutionPolicy bypass -file {tmp}\toolbar-installer.ps1" ; Flags: runasoriginaluser; StatusMsg: "Installing MapAction Toolbar for ArcGIS Pro"
