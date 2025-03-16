@@ -32,8 +32,8 @@ E.g. version `2.1.3.1.3` breaks down to:
     - name release/tag as per [Installer Version](#installer-version) minus the installer component (e.g. `2.1.3.1`)
     - this is a stop-gap solution until releases are uploaded to the main toolbar project
 - check frozen dependencies in `requirements.txt` for `download-wheels.ps1` script
-- update `Version` definition as per [Installer Version](#installer-version) in `toolbar-installer.iss`
 - update `$addin_version` as per [Installer Version](#installer-version) in `download-addin.ps1`
+- update `Version` definition as per [Installer Version](#installer-version) in `toolbar-installer.iss`
 
 ## Build
 
@@ -55,7 +55,7 @@ If `build-installer.ps1` fails, open `toolbar-installer.iss` in Inno Setup Compi
 
 ## Distribute
 
-Upload to: 
+Upload to https://github.com/mapaction/mapaction-arcgispro-toolbar-installer/releases.
 
 ## Licence
 
