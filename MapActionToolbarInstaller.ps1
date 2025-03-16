@@ -106,11 +106,11 @@ Write-Output("## [4/4] Installing Esri AddIn ##")
 #  - "$env:LOCALAPPDATA\MapAction\toolbar-for-arcgispro"
 #
 # 2) Add registry key, which directs ArcGIS Pro to look in the directory above:
-#  - "HKCU\SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
+#  - "HKCU:\Software\ESRI\ArcGISPro\Settings\Add-In Folders"
 
 $assemblyCache_folder = $env:LOCALAPPDATA + "\ESRI\ArcGISPro\AssemblyCache"
 $target_addinX_folder = $env:LOCALAPPDATA + "\MapAction\toolbar-for-arcgispro"
-$target_reg_path = "HKCU:SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
+$target_reg_path = "HKCU:\Software\ESRI\ArcGISPro\Settings\Add-In Folders"
 $source_addinx_file = $PSScriptRoot + "\MapActionToolbars.esriAddinX"
 $source_python_dir = $PSScriptRoot + "\python"
 $target_python_dir = $target_addinX_folder + "\python"
