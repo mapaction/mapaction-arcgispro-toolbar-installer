@@ -159,7 +159,7 @@ Copy-item -path $source_addinx_file -destination $target_addinX_folder
 
 # Check that the "Add-In Folder" SubHive exists
 Write-Information("INFO Configuring registry.")
-New-Item -itemType "REG_SZ" -path $target_reg_path -ErrorAction:Ignore
+New-Item -force -path $target_reg_path
 # Add the path to the AddIn folder
 Set-ItemProperty -path $target_reg_path -name $target_addinX_folder -Type "String" -Value $null
 
