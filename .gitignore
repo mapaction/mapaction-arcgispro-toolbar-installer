@@ -1,0 +1,5 @@
+wheels/*.whl
+scripts/*
+*.esriAddinX
+*.zip
+*.exe
