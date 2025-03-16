@@ -29,9 +29,8 @@ SetupLogging=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 Source: "MapActionToolbars.esriAddinX"; DestDir: "{tmp}"; Flags: ignoreversion
-Source: "..\MapActionToolbars\Python\*.pyt"; DestDir: "{tmp}\python"; Flags: ignoreversion
+Source: "scripts\*.pyt"; DestDir: "{tmp}\python"; Flags: ignoreversion
 Source: "wheels\*.whl"; DestDir: "{tmp}\wheels"; Flags: ignoreversion
 Source: "requirements.txt"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: "toolbar-installer.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
