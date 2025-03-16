@@ -106,11 +106,11 @@ Write-Output("## [4/4] Installing Esri AddIn ##")
 #  - "$env:LOCALAPPDATA\MapAction\toolbar-for-arcgispro"
 #
 # 2) Add registry key, which directs ArcGIS Pro to look in the directory above:
-#  - "HKCU\SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
+#  - "HKCU:\Software\ESRI\ArcGISPro\Settings\Add-In Folders"
 
 $assemblyCache_folder = $env:LOCALAPPDATA + "\ESRI\ArcGISPro\AssemblyCache"
 $target_addinX_folder = $env:LOCALAPPDATA + "\MapAction\toolbar-for-arcgispro"
-$target_reg_path = "HKCU:SOFTWARE\ESRI\ArcGISPro\Settings\Add-In Folders"
+$target_reg_path = "HKCU:\Software\ESRI\ArcGISPro\Settings\Add-In Folders"
 $source_addinx_file = $PSScriptRoot + "\MapActionToolbars.esriAddinX"
 $source_python_dir = $PSScriptRoot + "\python"
 $target_python_dir = $target_addinX_folder + "\python"
@@ -159,7 +159,7 @@ Copy-item -path $source_addinx_file -destination $target_addinX_folder
 
 # Check that the "Add-In Folder" SubHive exists
 Write-Information("INFO Configuring registry.")
-New-Item -itemType "REG_SZ" -path $target_reg_path -ErrorAction:Ignore
+New-Item -force -path $target_reg_path
 # Add the path to the AddIn folder
 Set-ItemProperty -path $target_reg_path -name $target_addinX_folder -Type "String" -Value $null
 

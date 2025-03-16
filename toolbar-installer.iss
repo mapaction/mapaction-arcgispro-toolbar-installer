@@ -2,7 +2,7 @@
 ; https://jrsoftware.org/ishelp/
 
 #define OrgURL "https://www.mapaction.org"
-#define Version "3.1.3.2"
+#define Version "3.4.2.1.1"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -29,12 +29,11 @@ SetupLogging=yes
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 Source: "MapActionToolbars.esriAddinX"; DestDir: "{tmp}"; Flags: ignoreversion
-Source: "..\MapActionToolbars\Python\*.pyt"; DestDir: "{tmp}\python"; Flags: ignoreversion
+Source: "scripts\*.pyt"; DestDir: "{tmp}\python"; Flags: ignoreversion
 Source: "wheels\*.whl"; DestDir: "{tmp}\wheels"; Flags: ignoreversion
 Source: "requirements.txt"; DestDir: "{tmp}"; Flags: ignoreversion
-Source: "MapActionToolbarInstaller.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
+Source: "toolbar-installer.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Run]
 Filename: "{win}\system32\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoExit -NoProfile -ExecutionPolicy bypass -file {tmp}\MapActionToolbarInstaller.ps1" ; Flags: runasoriginaluser; StatusMsg: "Installing MapAction Toolbar for ArcGIS Pro"
