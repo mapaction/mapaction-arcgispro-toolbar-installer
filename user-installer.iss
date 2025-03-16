@@ -34,7 +34,7 @@ Source: "MapActionToolbars.esriAddinX"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: "..\MapActionToolbars\Python\*.pyt"; DestDir: "{tmp}\python"; Flags: ignoreversion
 Source: "wheels\*.whl"; DestDir: "{tmp}\wheels"; Flags: ignoreversion
 Source: "requirements.txt"; DestDir: "{tmp}"; Flags: ignoreversion
-Source: "MapActionToolbarInstaller.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
+Source: "toolbar-installer.ps1"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Run]
 Filename: "{win}\system32\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoExit -NoProfile -ExecutionPolicy bypass -file {tmp}\MapActionToolbarInstaller.ps1" ; Flags: runasoriginaluser; StatusMsg: "Installing MapAction Toolbar for ArcGIS Pro"
