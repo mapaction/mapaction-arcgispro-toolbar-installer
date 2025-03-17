@@ -41,11 +41,9 @@ if (Get-Process -Name "ArcGISPro" -ErrorAction:Ignore){
 # Set varibles to point to exes we use
 # ESRI provide `propy.bat` which resolves to the currently active conda env 
 $pythonPath = $arcpro_root + '\bin\Python\Scripts\propy.bat'
-$condaEnvPath = $arcpro_root + '\bin\Python\Scripts\conda-env.exe'
 $condaPath = $arcpro_root + '\bin\Python\Scripts\conda.exe'
 $pythonEnvUtilsPath = $arcpro_root + '\bin\PythonEnvUtils.exe'
 Write-Information("INFO `pythonPath`: " + $pythonPath)
-Write-Information("INFO `condaEnvPath`: " + $condaEnvPath)
 Write-Information("INFO `condaPath`: " + $condaPath)
 Write-Information("INFO `pythonEnvUtilsPath`: " + $pythonEnvUtilsPath)
 
@@ -57,7 +55,7 @@ Write-Output("## [2/4] Checking Python environment ##")
 
 $target_venv_name = "mapaction-arc-py3"
 
-if (!(& $condaEnvPath list | Select-String -pattern "^$target_venv_name\s")){
+if (!(& $condaPath env list | Select-String -pattern "^$target_venv_name\s")){
     Write-Information("INFO Target conda env: '" + $target_venv_name + "' not found.")
 
     Write-Information("INFO Cloning default ArcGIS Pro conda env as: '" + $target_venv_name + "'.")
