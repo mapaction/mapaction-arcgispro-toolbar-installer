@@ -2,7 +2,7 @@
 ; https://jrsoftware.org/ishelp/
 
 #define OrgURL "https://www.mapaction.org"
-#define Version "3.4.2.1.3"
+#define Version "3.4.2.2.0"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
