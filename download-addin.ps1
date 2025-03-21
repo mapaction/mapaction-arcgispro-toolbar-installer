@@ -1,4 +1,4 @@
-$addin_version = "3.4.2.1"
+$addin_version = "3.4.2.2"
 $addin_name = "MapActionToolbars.esriAddinX"
 $addin_url = "https://github.com/felnne/mapaction-arcgispro-toolbar/releases/download/$addin_version/$addin_name"
 Write-Output "[Debug] $addin_url"
