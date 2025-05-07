@@ -13,7 +13,7 @@ MapAction toolbar for ArcGIS Pro installer
 
 ### Installer version
 
-Installer version (set in `toolbar-installe.iss`) consists of: `{arcpro-version}.{addin-version}.{installer-version}`.
+Installer version (set in `toolbar-installer.iss`) consists of: `{arcpro-version}.{addin-version}.{installer-version}`.
 
 Where:
 
